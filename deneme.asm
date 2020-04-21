@@ -16,6 +16,7 @@
 	q2E3 : .asciiz "\nEnter the first dimension of first matrix : "
 	q2E4 : .asciiz "\nEnter the second dimension of first matrix : " 
 	q3E1 : .asciiz "\nEnter an input string : "
+	# q3E8 : .asciiz "blabla"
 
 .text
 	li $s4, 1  #Choices
