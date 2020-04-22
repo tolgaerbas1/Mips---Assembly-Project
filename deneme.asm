@@ -114,12 +114,36 @@ loop:
 	move $s1, $t5
 	addi $t6, $t6, -1
 	j loop
-	
-question1Print:
 		
 question2:
+	la $a0, q2E1
+	li $v0, 4               #changing the mode to print string
+	syscall
+	li $v0, 8
+	li $a1, 60
+	la $a0, array   #recording the input to array' address
+	syscall
+	move $t0, $a0
+	li $t1, 0
+	li $v0, 4
+	lb $a1, array($t1)
+	move $a0, $a1
+	
+	syscall
 	j mainMenu
+	
+	
+	
+	
+	
+	
+	
 question3:
+	
+	la $a0, space
+	li $v0, 8
+	syscall
+	
 	li $v0, 4
 	la $a0, q3E1
 	syscall
