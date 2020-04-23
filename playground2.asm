@@ -1,0 +1,14 @@
+.data
+
+
+.text
+
+
+
+main:
+
+
+
+
+
+loop:
