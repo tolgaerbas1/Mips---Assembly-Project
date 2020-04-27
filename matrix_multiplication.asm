@@ -28,7 +28,7 @@ enterFirstMatrix:	.asciiz "Enter the first matrix: "
 enterSecondMatrix:	.asciiz "Enter the second matrix: "
 enterFirstDimensionFM:	.asciiz "Enter the first dimension of first matrix: "
 enterSecondDimensionFM:	.asciiz "Enter the second dimension of first matrix: "
-multiplicationMatrix:	.asciiz "Multiplication Matrix: "
+multMatrixStr:		.asciiz "\n\nMultiplication matrix: \n"
 
 # log strings
 inSetZero:		.asciiz "In Set Zero !\n"
@@ -83,6 +83,10 @@ q2:
 	syscall
 
 matrixMultStart:
+	
+	li $v0, 4
+	la $a0, multMatrixStr
+	syscall
 	
 	li $s1, 0  # i
 	li $s2, 0  # j
@@ -169,6 +173,11 @@ multLoop3Start:
 	j multLoop3
 
 multLoop3:
+	
+	# number of rows of A is a.
+	# number of columns of A is b at the same time b is number of rows of B ( A:  a x b, B : b x c ).
+	# number of columns of B is c.
+	# result matrix dimensions are a x c.
 	
 	# A [ b * i + k ]
 	la $t0, secondDimension 
@@ -375,15 +384,4 @@ updateValue:
 	
 
 ####-------------Matrix parse and fill array method Finish --------------####
-
-
-printArrays:
-	
-	
-	li $v0, 1
-	la $a0, secondDimension
-	lw $a0, 0($a0)
-	syscall
-	
-	jr $ra
 	
