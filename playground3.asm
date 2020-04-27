@@ -17,6 +17,7 @@ secondDimension: 	.space 4
 secondMatrixLength:	.space 4
 secondMatrixCol: 	.space 4
 productMatrixArray:	.space 2048
+firstLoop:		.space 4
 
 
 enterStr:		.asciiz "Please enter a string: "
@@ -32,6 +33,9 @@ multiplicationMatrix:	.asciiz "Multiplication Matrix: "
 # log strings
 inSetZero:		.asciiz "In Set Zero !\n"
 inUpdateValue:		.asciiz "In Update Value !\n"
+inMultLoop1:		.asciiz "In Mult Loop 1\n"
+inMultLoop2:		.asciiz "In Mult Loop 2\n"
+inMultLoop3:		.asciiz "In Mult Loop 3\n"
 
 ### print 
 # string 4
@@ -71,14 +75,155 @@ q2:
 	la $a1, secondDimension
 	jal parseMatrix
 	
+	jal setDimensions
 	
-	#jal setDimensions
-	
-	#jal printArrays
+	jal matrixMultStart
 
 	li $v0, 10
 	syscall
 
+matrixMultStart:
+	
+	li $s1, 0  # i
+	li $s2, 0  # j
+	li $s3, 0  # k
+	
+	move $s7, $ra
+	
+	j multLoop1
+
+systemcall:
+	syscall
+
+jumpBack:
+	
+	jr $s7
+	
+			
+multLoop1:
+
+	jal multLoop2Start
+	
+	# statements
+	
+	la $a0, newLine
+	li $v0, 4
+	syscall
+	
+	# condition statements
+	# if s1++ = s4 break
+	addi $s1, $s1, 1 # s1++
+	la $t0, firstDimension 
+	lw $t0, 0($t0)
+	beq $s1, $t0 jumpBack 
+	
+	j multLoop1
+	
+multLoop2Start:
+	
+	move $s4, $ra # save return address of loop 1 to s4 
+	li $s2, 0  # j
+	
+	j multLoop2
+	
+multLoop2:
+
+	jal multLoop3Start
+	# statements
+	
+	la $a0, spaceChar
+	li $v0, 4
+	syscall
+	
+	la $t0, secondMatrixCol 
+	lw $t0, 0($t0)
+	
+	mul $t1, $s1, $t0
+	add $t1, $t1, $s2
+	addi $t7, $zero, 4
+	mul $t1, $t1, $t7  # ( i * c + j ) * 4
+	
+	la $t4, productMatrixArray
+	add $t4, $t4, $t1
+	lw $a0, 0($t4)
+	li $v0, 1
+	syscall
+	
+	addi $s2, $s2, 1 # s2++
+	la $t0, secondMatrixCol 
+	lw $t0, 0($t0)
+	beq $s2, $t0, jumpMultLoop1Next 
+	
+	j multLoop2
+
+jumpMultLoop1Next:
+	
+	jr $s4
+	
+
+multLoop3Start:
+	
+	move $s5, $ra # save return register of loop 2 to s5
+	li $s3, 0  # k
+	
+	j multLoop3
+
+multLoop3:
+	
+	# A [ b * i + k ]
+	la $t0, secondDimension 
+	lw $t0, 0($t0) # t0 = b
+	
+	mul $t1, $s1, $t0 # t1 = i * b
+	add $t1, $t1, $s3 # t1 += k (s3)
+	addi $t7, $zero, 4
+	mul $t1, $t1, $t7  # ( b * i + k ) * 4	
+	
+	la $t2, firstMatrixArray
+	add $t2, $t2, $t1
+	lw $t2, 0($t2) # t2 = A [ b * i + k ]
+	
+	# B [ c * k + j ]
+	la $t0, secondMatrixCol 
+	lw $t0, 0($t0) # t0 = c
+	
+	mul $t1, $s3, $t0 # t1 = c * k
+	add $t1, $t1, $s2 # t1 += j (s2)
+	addi $t7, $zero, 4 
+	mul $t1, $t1, $t7  # ( c * k + j ) * 4
+	
+	la $t3, secondMatrixArray
+	add $t3, $t3, $t1 
+	lw $t3, 0($t3) # t3 = B [ c * k + j ]
+	
+	# R [ i * c + j]
+	mul $t1, $s1, $t0 # t0 = c and t1 = i * c
+	add $t1, $t1, $s2 # t1 +=  j
+	addi $t7, $zero, 4
+	mul $t1, $t1, $t7  # ( c * i + j ) * 4
+	
+	la $t4, productMatrixArray
+	add $t4, $t4, $t1
+	lw $t5, 0($t4) # t5 = R [ i * c + j]
+	
+	# R [ i * c + j ] += A [ b * i + k ] *  B [ c * k + j ]
+	mul $t3, $t3, $t2 # t3 = t3 * t2 => t3 = A[index] * B[index]
+	add $t3, $t5, $t3 # t3 += t5 => R[index] += A[index] * B[index] 
+	sw $t3, 0($t4) # store result t3 at R [ i * c + j  ]
+	
+	addi $s3, $s3, 1 # s3++
+	la $t0, secondDimension 
+	lw $t0, 0($t0) # t0 = b
+	beq $s3, $t0, jumpMultLoop2Next 
+	
+	j multLoop3
+	
+	
+jumpMultLoop2Next:
+	
+	jr $s5
+	
+	
 setSecondMatrixLength:
 
 	la $t1, secondMatrixArray
@@ -88,9 +233,7 @@ setSecondMatrixLength:
 	la $t2, secondMatrixLength
 	sw $t1, 0($t2)
 	
-	move $a0, $t2
-	li $v0, 1
-	syscall
+	jr $ra
 	
 setDimensions:
 
@@ -101,14 +244,12 @@ setDimensions:
 	la $t2, secondMatrixLength
 	lw $t2, 0($t2) 
 	
-	li $v0, 1
-	move $a0, $t1
-	syscall
+	div $t1, $t2, $t1 # t1 = secondMatrixLength / secondDimensin ( secondMatrixCol = t1 )
 	
-	move $a0, $t2
-	syscall
+	la $t2, secondMatrixCol
+	sw $t1, 0($t2)
 	
-	
+	jr $ra
 	#div $t1, $t2, $t1 # s2 contains the second matrix column length now.
 	#la $t1, secondMatrixCol
 	#sw $s2, 0($t1)
