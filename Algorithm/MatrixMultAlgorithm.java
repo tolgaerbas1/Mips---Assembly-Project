@@ -17,15 +17,15 @@ public class MyClass {
       int b = 4; // row length matrix B # this is column length of matrix A at the same time. 
       int c = 2; // column length of matrix B
       
-      for (int i = 0; i < a; i++){
-          for(int j = 0; j < c; j++){
+      for (int i = 0; i < a; i++){   // C[2,1]   (row - 1) * column length + 0
+          for(int j = 0; j < c; j++){  // A[4,3]   3*column + 2
               for(int k = 0; k < b; k++){
-                
-                matrixC [ i * c + j ] += matrixA [ b * i + k ] * matrixB [ c * k + j ];
-                   
+
+                  matrixC [ i * c + j ] += matrixA [ b * i + k ] * matrixB [ c * k + j ];
+
               }
               
-              System.out.print(matrixC [ i * c + j ] + " ");
+              System.out.print(   matrixC [ i * c + j ] + " ");
               
           }
          System.out.println();

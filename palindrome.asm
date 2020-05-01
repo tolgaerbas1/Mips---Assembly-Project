@@ -5,13 +5,13 @@ enterAnInputStr:	.asciiz "Enter an input string: "
 isNotPalindromeStr:	.asciiz " is not a palindrome."
 isPalindromeStr:	.asciiz " is a palindrome."
 newLine:		.asciiz "\n"
-
+spaceChar:		.asciiz " "
 
 # buffer size
 inputStrBuffer:		.space 100
 inputCharAsciiDec:	.space 4
 inputLastCharPointer:	.space 4
-
+resultStr:		.space 125
 
 .text
 
@@ -43,19 +43,7 @@ beforeCheckPalindrome:
 	li $s1, 0 # it will be increased 
 	addi $s0, $s0, -1 # s0 contains the length of str it will be decreased.
 	
-	li $v0, 1
-	move $a0, $s1
-	syscall
-
-	li $v0, 4
-	la $a0, newLine
-	syscall
-	
-	li $v0, 1
-	move $a0, $s0
-	syscall
-	
-	la $s1, inputStrBuffer
+	#la $s1, inputStrBuffer
 	
 	j checkPalindrome
 	
@@ -70,22 +58,6 @@ checkPalindrome:
 	lb $t1, 0($t1)
 	lb $t2, 0($t2)
 	
-	li $v0, 1
-	move $a0, $t1
-	syscall
-
-	li $v0, 1
-	la $a0, newLine
-	syscall
-	
-	li $v0, 1
-	move $a0, $t2
-	syscall
-
-	li $v0, 1
-	la $a0, newLine
-	syscall
-	
 	addi $s1, $s1, 1
 	addi $s0, $s0, -1
 	
@@ -99,13 +71,24 @@ isPalindrome:
 	la $a0, newLine
 	syscall
 	
-	la $a0, inputStrBuffer
+	la $a1, inputStrBuffer
+	la $a0, resultStr
+	jal stringConcatStart
+	
+	
+	la $a1, isPalindromeStr
+	jal stringConcatStart
+
+	li $v0, 4
+	la $a0, resultStr
 	syscall
 	
-	la $a0, isPalindromeStr
+	li $v0, 4
+	la $a0, newLine
 	syscall
-	
+
 	jr $s7
+	
 	
 isNotPalindrome:
 	
@@ -113,13 +96,50 @@ isNotPalindrome:
 	la $a0, newLine
 	syscall
 	
-	la $a0, inputStrBuffer
+	
+	la $a1, inputStrBuffer
+	la $a0, resultStr
+	jal stringConcatStart
+	
+	
+	la $a1, isNotPalindromeStr
+	jal stringConcatStart
+
+	li $v0, 4
+	la $a0, resultStr
 	syscall
 	
-	la $a0, isNotPalindromeStr
+	li $v0, 4
+	la $a0, newLine
 	syscall
-	
+
 	jr $s7
+	
+stringConcatStart:
+	# a0 is is the address of result str will store
+	# a1 is the will concatinate string address
+	
+	move $s1, $a0
+	move $s2, $a1
+	j stringConcat
+	
+
+
+stringConcat:
+
+	lb $t0, 0($s2)
+	move $a0, $s1 # store the last added char address in result str to continue from here when adding the other string to the this.
+	addi, $t1, $zero, 10
+	beq $t0, $t1, jumpBackPal
+	sb $t0, 0($s1)
+	addi $s1, $s1, 1 # increment the address by 1 because the we will store byte.
+	addi $s2, $s2, 1
+	j stringConcat
+	
+jumpBackPal:
+	
+	jr $ra
+	
 
 	
 beforeConvertLowerAndGetLength:

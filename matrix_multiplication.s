@@ -49,15 +49,16 @@ inMultLoop3:		.asciiz "In Mult Loop 3\n"
 
 
 .text
-	j q2	
-q2:
+.globl main
+
+main:
 	
 	jal getFirstMatrixAsString
 	jal getSecondMatrixAsString
 	jal getFirstDimensionFMAsString
 	jal getSecondDimensionFMAsString
 	
-	la $a0, firstMatrixBuffer  
+	la $a0, firstMatrixBuffer
 	la $a1, firstMatrixArray
 	jal parseMatrix
 	
@@ -139,7 +140,7 @@ multLoop2:
 	li $v0, 4
 	syscall
 	
-	la $t0, secondMatrixCol
+	la $t0, secondMatrixCol 
 	lw $t0, 0($t0)
 	
 	mul $t1, $s1, $t0
@@ -232,7 +233,7 @@ jumpMultLoop2Next:
 	
 	jr $s5
 	
-	# 0x00000000  0x0000000016  16 = length * 4
+	
 setSecondMatrixLength:
 
 	la $t1, secondMatrixArray
@@ -336,12 +337,12 @@ parseMatrix:
 	addi $s0, $zero, -1  # s0 contains the loop counter
 	move $s7, $zero
 	move $s1, $a0 # set the address of string** buffer to s1 which is passed to the $a0 register
-	move $s2, $a1 # set the address of array** buffer to s2 which is passed to the $a1 register
-	j parseLoop 
+	move $s2, $a1 # set the address of array** buffer to s1 which is passed to the $a1 register
+	j parseLoop
 
 
 parseLoop:
-
+	
 	# get the char from incremented address
 	addi $s0, $s0, 1   #    s0++
 	add $t0, $s0, $s1   #  t0 = s0 + s1    s1 holds address of string buffer
